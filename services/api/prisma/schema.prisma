@@ -1,0 +1,175 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String         @id @default(uuid())
+  email        String         @unique
+  passwordHash String
+  name         String
+  role         String         @default("USER") // USER, ADMIN
+  createdAt    DateTime       @default(now())
+  projects     Project[]
+  conversations Conversation[]
+  automations  Automation[]
+  courses      LearningCourse[]
+  documents    Document[]
+}
+
+model Project {
+  id           String         @id @default(uuid())
+  name         String
+  description  String?
+  userId       String
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversations Conversation[]
+  memories     Memory[]
+  documents    Document[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+model Conversation {
+  id          String     @id @default(uuid())
+  title       String
+  systemMode  String     @default("JARVIS") // JARVIS, ULTRON, FRIDAY, KAREN, EDITH
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId   String?
+  project     Project?   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  messages    Message[]
+  agentRuns   AgentRun[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String       // user, assistant
+  content        String
+  citations      String?      // JSON string of sources: [{title, url, snippet}]
+  freshness      String?      // JSON string of freshness metadata: {lastChecked, source, status}
+  modelUsed      String?
+  createdAt      DateTime     @default(now())
+}
+
+model Memory {
+  id        String   @id @default(uuid())
+  userId    String
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  type      String   // SHORT, LONG, PROJECT, EPISODIC
+  category  String   // PREFERENCE, FACT, DECISION, TECH
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model AgentRun {
+  id             String      @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  objective      String
+  status         String      // PENDING, RUNNING, PAUSED, COMPLETED, FAILED
+  steps          String      // JSON string of all agent steps and logs
+  createdAt      DateTime    @default(now())
+  tasks          AgentTask[]
+}
+
+model AgentTask {
+  id         String   @id @default(uuid())
+  agentRunId String
+  agentRun   AgentRun @relation(fields: [agentRunId], references: [id], onDelete: Cascade)
+  title      String
+  status     String   // PENDING, ACTIVE, COMPLETED, FAILED
+  result     String?
+  elapsedMs  Int      @default(0)
+  orderIndex Int
+}
+
+model Automation {
+  id             String          @id @default(uuid())
+  userId         String
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String
+  triggerType    String          // CRON, WEBHOOK
+  triggerConfig  String          // JSON configuration e.g. { interval: 'daily', time: '09:00' }
+  actionType     String          // SLACK, EMAIL, WEBHOOK, GITHUB
+  actionConfig   String          // JSON configuration
+  conditionConfig String?        // JSON condition
+  isActive       Boolean         @default(true)
+  runs           AutomationRun[]
+  createdAt      DateTime        @default(now())
+}
+
+model AutomationRun {
+  id           String     @id @default(uuid())
+  automationId String
+  automation   Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  status       String     // SUCCESS, FAILED
+  log          String
+  executionTime Int        @default(0) // ms
+  createdAt    DateTime   @default(now())
+}
+
+model LearningCourse {
+  id                String             @id @default(uuid())
+  userId            String
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title             String
+  subject           String
+  level             String             // BEGINNER, INTERMEDIATE, ADVANCED, EXPERT
+  roadmap           String             // JSON representation of lessons/modules
+  currentTopicIndex Int                @default(0)
+  progress          LearningProgress[]
+  createdAt         DateTime           @default(now())
+}
+
+model LearningProgress {
+  id           String         @id @default(uuid())
+  courseId     String
+  course       LearningCourse @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  topicName    String
+  isCompleted  Boolean        @default(false)
+  quizScore    Int?
+  flashcards   String?        // JSON of cards: [{front, back, status}]
+  createdAt    DateTime       @default(now())
+}
+
+model Document {
+  id             String          @id @default(uuid())
+  projectId      String?
+  project        Project?        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title          String
+  fileType       String
+  storagePath    String?
+  fileSize       Int
+  indexingStatus String          @default("PENDING") // PENDING, INDEXED, FAILED
+  version        String          @default("1.0")
+  metadata       String?         // JSON meta: {tags, owner}
+  chunks         DocumentChunk[]
+  createdAt      DateTime        @default(now())
+}
+
+model DocumentChunk {
+  id         String   @id @default(uuid())
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  content    String
+  embedding  String   // JSON stringified float array
+  orderIndex Int
+  createdAt  DateTime @default(now())
+}
+
+model SystemSetting {
+  key   String @id
+  value String
+}

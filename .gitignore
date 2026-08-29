@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Builds
+dist/
+build/
+
+# Secrets & Environment variables
+.env
+.env.local
+
+# Databases
+*.db
+*.db-journal
+*.sqlite
+dev.db
+
+# OS specific files
+.DS_Store
+Thumbs.db

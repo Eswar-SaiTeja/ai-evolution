@@ -1,0 +1,20 @@
+{
+  "name": "ai-evolution-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "services/*"
+  ],
+  "scripts": {
+    "dev:backend": "npm run dev -w services/api",
+    "dev:frontend": "npm run dev -w apps/web",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "build": "npm run build -w apps/web -w services/api",
+    "prisma:generate": "npm run prisma:generate -w services/api",
+    "prisma:migrate": "npm run prisma:migrate -w services/api"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
