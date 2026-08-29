@@ -19,5 +19,5 @@ EXPOSE 5000
 ENV PORT=5000
 ENV NODE_ENV=production
 
-# Boot database and start API server
-CMD ["node", "dist/index.js"]
+# Boot database tables and start API server
+CMD npx prisma db push --schema=prisma/schema.prisma && node dist/index.js
