@@ -84,9 +84,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
           </div>
         </div>
 
+        {/* Enter workspace button (Moved above timeline for instant visibility) */}
+        <motion.button
+          whileHover={{ scale: 1.03, boxShadow: '0 0 20px rgba(0, 210, 255, 0.5)' }}
+          whileTap={{ scale: 0.98 }}
+          onClick={onEnter}
+          className="my-4 px-8 py-3 bg-transparent border-2 border-jarvis text-jarvis text-sm font-bold tracking-widest font-mono rounded shadow-hud-jarvis uppercase hover:bg-jarvis hover:text-cyber-bg transition-colors z-20"
+        >
+          Initialize AI Workspace
+        </motion.button>
+
         {/* Cinematic Evolution Timeline */}
-        <div className="w-full max-w-5xl mt-4">
-          <div className="relative py-4">
+        <div className="w-full max-w-5xl mt-2">
+          <div className="relative py-2">
             {/* Connection Line */}
             <div className="absolute top-1/2 left-0 right-0 h-[2px] bg-gradient-to-r from-jarvis/30 via-friday/30 to-edith/30 -translate-y-1/2 hidden md:block" />
             
@@ -124,16 +134,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
             </div>
           </div>
         </div>
-
-        {/* Enter workspace button (Optimized sizes) */}
-        <motion.button
-          whileHover={{ scale: 1.03, boxShadow: '0 0 20px rgba(0, 210, 255, 0.5)' }}
-          whileTap={{ scale: 0.98 }}
-          onClick={onEnter}
-          className="mt-6 px-8 py-3 bg-transparent border-2 border-jarvis text-jarvis text-sm font-bold tracking-widest font-mono rounded shadow-hud-jarvis uppercase hover:bg-jarvis hover:text-cyber-bg transition-colors"
-        >
-          Initialize AI Workspace
-        </motion.button>
       </main>
 
       {/* Footer */}
